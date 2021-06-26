@@ -276,4 +276,37 @@ func TestBuildTable_DataType_Bigint(t *testing.T) {
 	assertStringContains(t, sql, "col1 BIGINT")
 }
 
+// TestBuildTable_DataType_Decimal ensures the Decimal-type columns are created
+// correctly.
+func TestBuildTable_DataType_Decimal(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Decimal("col1", 5, 2)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 DECIMAL(5, 2)")
+}
+
+// TestBuildTable_DataType_Numeric ensures the Numeric-type columns are created
+// correctly.
+//
+// This is kept as a DECIMAL type as both Decimal and Numeric types are treated
+// the same internally in MySQL.
+//
+// See: https://dev.mysql.com/doc/refman/8.0/en/fixed-point-types.html
+func TestBuildTable_DataType_Numeric(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Numeric("col1", 5, 2)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 DECIMAL(5, 2)")
+}
+
 // TODO flags

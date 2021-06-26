@@ -44,6 +44,10 @@ type TableBuilder interface {
 	Integer(name string)
 	Bigint(name string)
 
+	// Fixed-point Types
+	Decimal(name string, precision, scale int)
+	Numeric(name string, precision, scale int)
+
 	Timestamps()
 
 	// TODO make dataType an enum?
@@ -75,6 +79,30 @@ func (t *table) Integer(name string) {
 
 func (t *table) Bigint(name string) {
 	t.MakeColumn(name, "BIGINT", M_NOT_NULL)
+}
+
+// TODO
+//
+// From the MySQL documentation:
+// The precision represents the number of significant digits that are stored
+// for values, and the scale represents the number of digits that can be stored
+// following the decimal point. Standard SQL requires that DECIMAL(5,2) be able
+// to store any value with five digits and two decimals, so values that can be
+// stored in the salary column range from -999.99 to 999.99.
+func (t *table) Decimal(name string, precision, scale int) {
+	t.MakeColumn(name, fmt.Sprintf("DECIMAL(%d, %d)", precision, scale), M_NOT_NULL)
+}
+
+// TODO
+//
+// From the MySQL documentation:
+// The precision represents the number of significant digits that are stored
+// for values, and the scale represents the number of digits that can be stored
+// following the decimal point. Standard SQL requires that DECIMAL(5,2) be able
+// to store any value with five digits and two decimals, so values that can be
+// stored in the salary column range from -999.99 to 999.99.
+func (t *table) Numeric(name string, precision, scale int) {
+	t.Decimal(name, precision, scale)
 }
 
 func (t *table) Timestamps() {
