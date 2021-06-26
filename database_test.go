@@ -309,4 +309,32 @@ func TestBuildTable_DataType_Numeric(t *testing.T) {
 	assertStringContains(t, sql, "col1 DECIMAL(5, 2)")
 }
 
+// TestBuildTable_DataType_Float ensures the Float-type columns are created
+// correctly.
+func TestBuildTable_DataType_Float(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Float("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 FLOAT")
+}
+
+// TestBuildTable_DataType_Double ensures the Double-type columns are created
+// correctly.
+func TestBuildTable_DataType_Double(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Double("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 DOUBLE")
+}
+
 // TODO flags
