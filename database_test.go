@@ -10,7 +10,10 @@ import (
 	"testing"
 )
 
-// TODO
+// assertHasError checks the expected error was thrown.
+//
+// An edditional error will be thrown by this method if the expected string is
+// empty.
 func assertHasError(t *testing.T, out error, expected string) {
 	if out == nil {
 		t.Error("No error was returned")
@@ -26,7 +29,10 @@ func assertHasError(t *testing.T, out error, expected string) {
 	}
 }
 
-// TODO
+// assertStringContains checks the string contains the search string.
+//
+// An edditional error will be thrown by this method if the expected string is
+// empty.
 func assertStringContains(t *testing.T, haystack, needle string) {
 	if needle == "" {
 		// Bail here, otherwise we'll always contain an empty string.
@@ -38,7 +44,11 @@ func assertStringContains(t *testing.T, haystack, needle string) {
 	}
 }
 
-// TODO
+// assertStringCassertStringMissingontains checks the string does not contain
+// the search string.
+//
+// An edditional error will be thrown by this method if the expected string is
+// empty.
 func assertStringMissing(t *testing.T, haystack, needle string) {
 	if needle == "" {
 		// Bail here, otherwise we'll always contain an empty string.
