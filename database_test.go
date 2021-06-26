@@ -189,5 +189,91 @@ func TestBuildTable_hasColumn_LogsToTheConsoleIfItFindsDuplicateColumns(t *testi
 	assertStringContains(t, logOutput.String(), "column Int1 already defined in table test")
 }
 
-// TODO column types
+// TestBuildTable_DataType_ID ensures the TableBuilder's ID method creates the
+// ID column.
+//
+// The ID column is defined as a 40-length CHAR, which cannot be null and is the
+// primary key of the table.
+func TestBuildTable_DataType_ID(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.ID()
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "ID CHAR(40) NOT NULL PRIMARY UNIQUE KEY")
+}
+
+// TestBuildTable_DataType_Integer ensures the Integer-type columns are created
+// correctly.
+func TestBuildTable_DataType_Integer(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 INTEGER")
+}
+
+// TestBuildTable_DataType_Tinyint ensures the Tinyint-type columns are created
+// correctly.
+func TestBuildTable_DataType_Tinyint(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Tinyint("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 TINYINT")
+}
+
+// TestBuildTable_DataType_Smallint ensures the Smallint-type columns are
+// created correctly.
+func TestBuildTable_DataType_Smallint(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Smallint("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 SMALLINT")
+}
+
+// TestBuildTable_DataType_Mediumint ensures the Mediumint-type columns are
+// created correctly.
+func TestBuildTable_DataType_Mediumint(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Mediumint("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 MEDIUMINT")
+}
+
+// TestBuildTable_DataType_Bigint ensures the Bigint-type columns are created
+// correctly.
+func TestBuildTable_DataType_Bigint(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Bigint("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 BIGINT")
+}
+
 // TODO flags

@@ -36,7 +36,13 @@ type table struct {
 
 type TableBuilder interface {
 	ID()
+
+	// Integer Types
+	Tinyint(name string)
+	Smallint(name string)
+	Mediumint(name string)
 	Integer(name string)
+	Bigint(name string)
 
 	Timestamps()
 
@@ -51,8 +57,24 @@ func (t *table) ID() {
 	t.MakeColumn("ID", "CHAR(40)", M_UNIQUE|M_PRIMARY|M_NOT_NULL)
 }
 
+func (t *table) Tinyint(name string) {
+	t.MakeColumn(name, "TINYINT", M_NOT_NULL)
+}
+
+func (t *table) Smallint(name string) {
+	t.MakeColumn(name, "SMALLINT", M_NOT_NULL)
+}
+
+func (t *table) Mediumint(name string) {
+	t.MakeColumn(name, "MEDIUMINT", M_NOT_NULL)
+}
+
 func (t *table) Integer(name string) {
 	t.MakeColumn(name, "INTEGER", M_NOT_NULL)
+}
+
+func (t *table) Bigint(name string) {
+	t.MakeColumn(name, "BIGINT", M_NOT_NULL)
 }
 
 func (t *table) Timestamps() {
