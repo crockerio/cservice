@@ -399,4 +399,74 @@ func TestBuildTable_DataType_Bit_LargeLength(t *testing.T) {
 	assertStringContains(t, logOutput.String(), "length (70) passed to Bit column is above the maximum value accepted by this field (64)")
 }
 
+// TestBuildTable_DataType_Date ensures the Date-type columns are created
+// correctly.
+func TestBuildTable_DataType_Date(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Date("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 DATE")
+}
+
+// TestBuildTable_DataType_DateTime ensures the DateTime-type columns are created
+// correctly.
+func TestBuildTable_DataType_DateTime(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.DateTime("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 DATETIME")
+}
+
+// TestBuildTable_DataType_Timestamp ensures the Timestamp-type columns are
+// created correctly.
+func TestBuildTable_DataType_Timestamp(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Timestamp("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 TIMESTAMP")
+}
+
+// TestBuildTable_DataType_Time ensures the Time-type columns are created
+// correctly.
+func TestBuildTable_DataType_Time(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Time("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 TIME")
+}
+
+// TestBuildTable_DataType_Year ensures the Year-type columns are created
+// correctly.
+func TestBuildTable_DataType_Year(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Year("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 YEAR")
+}
+
 // TODO flags

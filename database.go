@@ -73,6 +73,12 @@ type TableBuilder interface {
 	// Length can range from 1 to 64 bits.
 	Bit(name string, length int)
 
+	Date(name string)
+	DateTime(name string)
+	Timestamp(name string)
+	Time(name string)
+	Year(name string)
+
 	Timestamps()
 
 	// TODO make dataType an enum?
@@ -134,6 +140,26 @@ func (t *table) Bit(name string, length int) {
 	}
 
 	t.MakeColumn(name, fmt.Sprintf("BIT(%d)", length), M_NOT_NULL)
+}
+
+func (t *table) Date(name string) {
+	t.MakeColumn(name, "DATE", M_NOT_NULL)
+}
+
+func (t *table) DateTime(name string) {
+	t.MakeColumn(name, "DATETIME", M_NOT_NULL)
+}
+
+func (t *table) Timestamp(name string) {
+	t.MakeColumn(name, "TIMESTAMP", M_NOT_NULL)
+}
+
+func (t *table) Time(name string) {
+	t.MakeColumn(name, "TIME", M_NOT_NULL)
+}
+
+func (t *table) Year(name string) {
+	t.MakeColumn(name, "YEAR", M_NOT_NULL)
 }
 
 func (t *table) Timestamps() {
