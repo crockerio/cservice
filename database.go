@@ -68,6 +68,11 @@ type TableBuilder interface {
 	Float(name string)
 	Double(name string)
 
+	// TODO
+	//
+	// Length can range from 1 to 64 bits.
+	Bit(name string, length int)
+
 	Timestamps()
 
 	// TODO make dataType an enum?
@@ -115,6 +120,20 @@ func (t *table) Float(name string) {
 
 func (t *table) Double(name string) {
 	t.MakeColumn(name, "DOUBLE", M_NOT_NULL)
+}
+
+func (t *table) Bit(name string, length int) {
+	if length < 1 {
+		log.Printf("length (%d) passed to Bit column is below the minimum value accepted by this field (1)", length)
+		length = 1
+	}
+
+	if length > 64 {
+		log.Printf("length (%d) passed to Bit column is above the maximum value accepted by this field (64)", length)
+		length = 64
+	}
+
+	t.MakeColumn(name, fmt.Sprintf("BIT(%d)", length), M_NOT_NULL)
 }
 
 func (t *table) Timestamps() {

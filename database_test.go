@@ -337,4 +337,66 @@ func TestBuildTable_DataType_Double(t *testing.T) {
 	assertStringContains(t, sql, "col1 DOUBLE")
 }
 
+// TestBuildTable_DataType_Bit ensures the Bit-type columns are created
+// correctly.
+func TestBuildTable_DataType_Bit(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Bit("col1", 8)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 BIT(8)")
+}
+
+// TestBuildTable_DataType_Bit_SmallLength ensures the Bit-type method correctly
+// handles recieving a bit length which is below the minimum (1) accepted by the
+// column.
+func TestBuildTable_DataType_Bit_SmallLength(t *testing.T) {
+	// Capture Logger output.
+	var logOutput bytes.Buffer
+	log.SetOutput(&logOutput)
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+
+	// Test Below
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Bit("col1", -1)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 BIT(1)")
+	assertStringContains(t, logOutput.String(), "length (-1) passed to Bit column is below the minimum value accepted by this field (1)")
+}
+
+// TestBuildTable_DataType_Bit_LargeLength ensures the Bit-type method correctly
+// handles recieving a bit length which is above the maximum (64) accepted by
+// the column.
+func TestBuildTable_DataType_Bit_LargeLength(t *testing.T) {
+	// Capture Logger output.
+	var logOutput bytes.Buffer
+	log.SetOutput(&logOutput)
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+
+	// Test Below
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Bit("col1", 70)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 BIT(64)")
+	assertStringContains(t, logOutput.String(), "length (70) passed to Bit column is above the maximum value accepted by this field (64)")
+}
+
 // TODO flags
