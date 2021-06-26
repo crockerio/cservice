@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 )
 
@@ -134,6 +135,11 @@ func (t *table) hasColumn(name string) bool {
 }
 
 func BuildTable(tableName string, builder func(TableBuilder)) (string, error) {
+	validName, _ := regexp.Match("^[0-9,a-z,A-Z$_]+$", []byte(tableName))
+	if !validName {
+		return "", fmt.Errorf("table name %s is invalid", tableName)
+	}
+
 	tb := &table{
 		name: tableName,
 	}

@@ -3,6 +3,7 @@ package cservice_test
 import (
 	"bytes"
 	"crockerio/cservice"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -100,9 +101,41 @@ func TestBuildTable_OnlyAddsOmittedGORMColumnsAfterBuilderFunctionRuns(t *testin
 	assertStringContains(t, sql, "DeletedAt DATETIME")
 }
 
-// TODO
+// TestBuildTable_TableNameValidation ensures the BuildTable method validates
+// the given table name to ensure it only contains characters which match the
+// following regex: [0-9,a-z,A-Z$_]
+//
+// If the table name is invalid, an error is returned.
+//
+// See: https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
 func TestBuildTable_TableNameValidation(t *testing.T) {
-	t.Skip("Not Yet Implemented")
+	testNames := map[string]bool{
+		"test":            true,
+		"test1234":        true,
+		"test_table":      true,
+		"TEST":            true,
+		"Test1234":        true,
+		"Test_Table_1234": true,
+		"$Test_1234":      true,
+		"Test Table":      false,
+		"Test T@ble":      false,
+	}
+
+	for name, valid := range testNames {
+		t.Run(name, func(t *testing.T) {
+			_, err := cservice.BuildTable(name, func(tb cservice.TableBuilder) {
+				tb.ID()
+			})
+
+			if valid {
+				if err != nil {
+					t.Errorf("expected %s to be valid, recieved error %s", name, err.Error())
+				}
+			} else {
+				assertHasError(t, err, fmt.Sprintf("table name %s is invalid", name))
+			}
+		})
+	}
 }
 
 // TestBuildTable_SkipsColumnIfItAlreadyExists ensures we skip creating a column
