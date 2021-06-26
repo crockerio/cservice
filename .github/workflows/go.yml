@@ -1,0 +1,48 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Start Docker
+      run: docker-compose up -d
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+    
+    - name: Install go-junit-report
+      run: go get -u github.com/jstemmer/go-junit-report
+
+    - name: Build
+      run: go build -v ./...
+
+    # - name: Sleep to allow MySQL to start up
+    #   uses: jakejarvis/wait-action@master
+    #   with:
+    #     time: '15s'
+
+    - name: Test
+      run: go test -v ./... | go-junit-report > report.xml
+
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: true                      # run this step even if previous step failed
+      with:
+        name: Go Tests              # Name of the check run which will be created
+        path: report.xml            # Path to test results
+        reporter: java-junit        # Format of test results
+
+    - name: Stop Docker
+      if: true # always run this step
+      run: docker-compose down
