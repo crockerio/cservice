@@ -79,6 +79,23 @@ type TableBuilder interface {
 	Time(name string)
 	Year(name string)
 
+	Char(name string, length int)
+	Varchar(name string, length int)
+	Binary(name string, length int)
+	Varbinary(name string, length int)
+
+	Tinyblob(name string)
+	Blob(name string)
+	Mediumblob(name string)
+	Longblob(name string)
+	Tinytext(name string)
+	Text(name string)
+	Mediumtext(name string)
+	Longtext(name string)
+
+	Enum(name string, values ...string)
+	Set(name string, values ...string)
+
 	Timestamps()
 
 	// TODO make dataType an enum?
@@ -160,6 +177,88 @@ func (t *table) Time(name string) {
 
 func (t *table) Year(name string) {
 	t.MakeColumn(name, "YEAR", M_NOT_NULL)
+}
+
+func (t *table) Char(name string, length int) {
+	t.MakeColumn(name, fmt.Sprintf("CHAR(%d)", length), M_NOT_NULL)
+}
+
+func (t *table) Varchar(name string, length int) {
+	t.MakeColumn(name, fmt.Sprintf("VARCHAR(%d)", length), M_NOT_NULL)
+}
+
+func (t *table) Binary(name string, length int) {
+	t.MakeColumn(name, fmt.Sprintf("BINARY(%d)", length), M_NOT_NULL)
+}
+
+func (t *table) Varbinary(name string, length int) {
+	t.MakeColumn(name, fmt.Sprintf("VARBINARY(%d)", length), M_NOT_NULL)
+}
+
+func (t *table) Tinyblob(name string) {
+	t.MakeColumn(name, "TINYBLOB", M_NONE)
+}
+
+func (t *table) Blob(name string) {
+	t.MakeColumn(name, "BLOB", M_NONE)
+}
+
+func (t *table) Mediumblob(name string) {
+	t.MakeColumn(name, "MEDIUMBLOB", M_NONE)
+}
+
+func (t *table) Longblob(name string) {
+	t.MakeColumn(name, "LONGBLOB", M_NONE)
+}
+
+func (t *table) Tinytext(name string) {
+	t.MakeColumn(name, "TINYTEXT", M_NONE)
+}
+
+func (t *table) Text(name string) {
+	t.MakeColumn(name, "TEXT", M_NONE)
+}
+
+func (t *table) Mediumtext(name string) {
+	t.MakeColumn(name, "MEDIUMTEXT", M_NONE)
+}
+
+func (t *table) Longtext(name string) {
+	t.MakeColumn(name, "LONGTEXT", M_NONE)
+}
+
+func (t *table) Enum(name string, values ...string) {
+	var sbType strings.Builder
+	fmt.Fprint(&sbType, "ENUM(")
+	for n, value := range values {
+		fmt.Fprint(&sbType, "'")
+		fmt.Fprint(&sbType, value)
+		fmt.Fprint(&sbType, "'")
+
+		if (n + 1) != len(values) {
+			fmt.Fprint(&sbType, ", ")
+		}
+	}
+	fmt.Fprint(&sbType, ")")
+
+	t.MakeColumn(name, sbType.String(), M_NONE)
+}
+
+func (t *table) Set(name string, values ...string) {
+	var sbType strings.Builder
+	fmt.Fprint(&sbType, "SET(")
+	for n, value := range values {
+		fmt.Fprint(&sbType, "'")
+		fmt.Fprint(&sbType, value)
+		fmt.Fprint(&sbType, "'")
+
+		if (n + 1) != len(values) {
+			fmt.Fprint(&sbType, ", ")
+		}
+	}
+	fmt.Fprint(&sbType, ")")
+
+	t.MakeColumn(name, sbType.String(), M_NONE)
 }
 
 func (t *table) Timestamps() {

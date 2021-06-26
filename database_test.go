@@ -469,4 +469,200 @@ func TestBuildTable_DataType_Year(t *testing.T) {
 	assertStringContains(t, sql, "col1 YEAR")
 }
 
+// TestBuildTable_DataType_Char ensures the Char-type columns are created
+// correctly.
+func TestBuildTable_DataType_Char(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Char("col1", 4)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 CHAR(4)")
+}
+
+// TestBuildTable_DataType_Varchar ensures the Varchar-type columns are created
+// correctly.
+func TestBuildTable_DataType_Varchar(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Varchar("col1", 4)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 VARCHAR(4)")
+}
+
+// TestBuildTable_DataType_Binary ensures the Binary-type columns are created
+// correctly.
+func TestBuildTable_DataType_Binary(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Binary("col1", 4)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 BINARY(4)")
+}
+
+// TestBuildTable_DataType_Varbinary ensures the Varbinary-type columns are
+// created correctly.
+func TestBuildTable_DataType_Varbinary(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Varbinary("col1", 4)
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 VARBINARY(4)")
+}
+
+// TestBuildTable_DataType_Tinyblob ensures the Tinyblob-type columns are
+// created correctly.
+func TestBuildTable_DataType_Tinyblob(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Tinyblob("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 TINYBLOB")
+}
+
+// TestBuildTable_DataType_Blob ensures the Blob-type columns are
+// created correctly.
+func TestBuildTable_DataType_Blob(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Blob("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 BLOB")
+}
+
+// TestBuildTable_DataType_Mediumblob ensures the Mediumblob-type columns are
+// created correctly.
+func TestBuildTable_DataType_Mediumblob(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Mediumblob("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 MEDIUMBLOB")
+}
+
+// TestBuildTable_DataType_Longblob ensures the Longblob-type columns are
+// created correctly.
+func TestBuildTable_DataType_Longblob(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Longblob("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 LONGBLOB")
+}
+
+// TestBuildTable_DataType_Tinytext ensures the Tinytext-type columns are
+// created correctly.
+func TestBuildTable_DataType_Tinytext(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Tinytext("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 TINYTEXT")
+}
+
+// TestBuildTable_DataType_text ensures the text-type columns are
+// created correctly.
+func TestBuildTable_DataType_text(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Text("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 TEXT")
+}
+
+// TestBuildTable_DataType_Mediumtext ensures the Mediumtext-type columns are
+// created correctly.
+func TestBuildTable_DataType_Mediumtext(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Mediumtext("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 MEDIUMTEXT")
+}
+
+// TestBuildTable_DataType_Longtext ensures the Longtext-type columns are
+// created correctly.
+func TestBuildTable_DataType_Longtext(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Longtext("col1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 LONGTEXT")
+}
+
+// TestBuildTable_DataType_Enum ensures the Enum-type columns are
+// created correctly.
+func TestBuildTable_DataType_Enum(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Enum("col1", "type1", "type2", "type3", "type4")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 ENUM('type1', 'type2', 'type3', 'type4')")
+}
+
+// TestBuildTable_DataType_Set ensures the Set-type columns are
+// created correctly.
+func TestBuildTable_DataType_Set(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Set("col1", "type1", "type2", "type3", "type4")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "col1 SET('type1', 'type2', 'type3', 'type4')")
+}
+
 // TODO flags
