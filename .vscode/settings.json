@@ -1,0 +1,22 @@
+{
+    "go.buildOnSave": "package",
+    "go.coverageDecorator": {
+        "type": "highlight",
+        "coveredHighlightColor": "rgba(64,128,128,0.5)",
+        "uncoveredHighlightColor": "rgba(128,64,64,0.25)",
+        "coveredBorderColor": "rgba(64,128,128,0.5)",
+        "uncoveredBorderColor": "rgba(128,64,64,0.25)",
+        "coveredGutterStyle": "blockblue",
+        "uncoveredGutterStyle": "slashyellow"
+      },
+      "go.coverOnSave": true,
+      "go.coverOnTestPackage": true,
+      "go.docsTool": "godoc",
+      "go.formatTool": "gofmt",
+      "go.lintOnSave": "package",
+      "go.lintTool": "golangci-lint",
+      "go.testOnSave": true,
+      "go.toolsManagement.autoUpdate": true,
+      "go.useLanguageServer": true,
+      "go.vetOnSave": "package"
+}
