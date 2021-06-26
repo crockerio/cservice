@@ -13,8 +13,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Start Docker
-      run: docker-compose up -d
+    # - name: Start Docker
+    #   run: docker-compose up -d
 
     - name: Set up Go
       uses: actions/setup-go@v2
@@ -43,6 +43,6 @@ jobs:
         path: report.xml            # Path to test results
         reporter: java-junit        # Format of test results
 
-    - name: Stop Docker
-      if: true # always run this step
-      run: docker-compose down
+    # - name: Stop Docker
+    #   if: true # always run this step
+    #   run: docker-compose down
