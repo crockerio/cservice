@@ -18,5 +18,6 @@
       "go.testOnSave": true,
       "go.toolsManagement.autoUpdate": true,
       "go.useLanguageServer": true,
-      "go.vetOnSave": "package"
+      "go.vetOnSave": "package",
+      "go.coverageOptions": "showUncoveredCodeOnly"
 }

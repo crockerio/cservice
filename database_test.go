@@ -1,7 +1,10 @@
 package cservice_test
 
 import (
+	"bytes"
 	"crockerio/cservice"
+	"log"
+	"os"
 	"strings"
 	"testing"
 )
@@ -22,9 +25,126 @@ func assertHasError(t *testing.T, out error, expected string) {
 	}
 }
 
+// TODO
+func assertStringContains(t *testing.T, haystack, needle string) {
+	if needle == "" {
+		// Bail here, otherwise we'll always contain an empty string.
+		t.Error("!!test-error!! empty 'needle' string")
+	}
+
+	if !strings.Contains(haystack, needle) {
+		t.Errorf("expected string (\"%s\") to contain string: \"%s\"", haystack, needle)
+	}
+}
+
+// TODO
+func assertStringMissing(t *testing.T, haystack, needle string) {
+	if needle == "" {
+		// Bail here, otherwise we'll always contain an empty string.
+		t.Error("!!test-error!! empty 'needle' string")
+	}
+
+	if strings.Contains(haystack, needle) {
+		t.Errorf("expected string (\"%s\") to not contain string: \"%s\"", haystack, needle)
+	}
+}
+
 // TestBuildTable_EmptyBuilder ensures that the BuildTable function returns an
 // error when an empty builder function is passed in.
 func TestBuildTable_EmptyBuilder(t *testing.T) {
 	_, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {})
 	assertHasError(t, err, "builder method is empty")
 }
+
+// TestBuildTable_AddsGORMColumnsAfterBuilderFunctionRuns encures the BuildTable
+// function automatically adds the date columns required by the GORM ORM package
+// after successfully running a populated builder function.
+//
+// These columns are CreatedAt, UpdatedAt and DeletedAt, all of type datetime.
+//
+// See: https://gorm.io/docs/models.html#gorm-Model
+func TestBuildTable_AddsGORMColumnsAfterBuilderFunctionRuns(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.ID()
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "ID CHAR(40) NOT NULL PRIMARY UNIQUE KEY")
+	assertStringContains(t, sql, "CreatedAt DATETIME NOT NULL")
+	assertStringContains(t, sql, "UpdatedAt DATETIME NOT NULL")
+	assertStringContains(t, sql, "DeletedAt DATETIME")
+}
+
+// TestBuildTable_OnlyAddsOmittedGORMColumnsAfterBuilderFunctionRuns ensures the
+// BuildTable function only adds the GORM columns which haven't already been
+// specified within the builder function.
+//
+// For example, if the builder function specified the CreatedAt column, we don't
+// want to recreate that, so only the UpdatedAt and Deleted at columns should be
+// added.
+func TestBuildTable_OnlyAddsOmittedGORMColumnsAfterBuilderFunctionRuns(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("CreatedAt")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "ID CHAR(40) NOT NULL PRIMARY UNIQUE KEY")
+	assertStringContains(t, sql, "CreatedAt INTEGER NOT NULL") // Test that we keep the INTEGER type column created at the start
+	assertStringContains(t, sql, "UpdatedAt DATETIME NOT NULL")
+	assertStringContains(t, sql, "DeletedAt DATETIME")
+}
+
+// TODO
+func TestBuildTable_TableNameValidation(t *testing.T) {
+	t.Skip("Not Yet Implemented")
+}
+
+// TestBuildTable_SkipsColumnIfItAlreadyExists ensures we skip creating a column
+// if it has previously been defined and stored within the internal
+// table.columns list.
+func TestBuildTable_SkipsColumnIfItAlreadyExists(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("Int1")
+		tb.Integer("Int1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "Int1 INTEGER")
+	assertStringMissing(t, sql, "Int1 INTEGER NOT NULL ,Int1 INTEGER NOT NULL")
+}
+
+// TestBuildTable_hasColumn_LogsToTheConsoleIfItFindsDuplicateColumns ensures
+// the hasColumn method provides a log message if if encounters a duplicate
+// column when building the table.
+func TestBuildTable_hasColumn_LogsToTheConsoleIfItFindsDuplicateColumns(t *testing.T) {
+	// Capture Logger output.
+	var logOutput bytes.Buffer
+	log.SetOutput(&logOutput)
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+
+	// Test Below
+	_, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("Int1")
+		tb.Integer("Int1")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, logOutput.String(), "column Int1 already defined in table test")
+}
+
+// TODO column types
+// TODO flags
