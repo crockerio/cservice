@@ -15,7 +15,7 @@ const (
 	M_AUTO_INCREMENT
 	M_UNIQUE
 	M_PRIMARY
-	// M_UNSIGNED
+	M_UNSIGNED
 
 	M_NONE = 0
 )
@@ -27,6 +27,7 @@ type column struct {
 	autoIncrement bool
 	unique        bool
 	primary       bool
+	unsigned      bool
 }
 
 type table struct {
@@ -96,6 +97,11 @@ type TableBuilder interface {
 	Enum(name string, values ...string)
 	Set(name string, values ...string)
 
+	NotNull(name string)
+	AutoIncrement(name string)
+	Unique(name string)
+	Unsigned(name string)
+
 	Timestamps()
 
 	// TODO make dataType an enum?
@@ -110,6 +116,7 @@ func (t *table) ID() {
 }
 
 func (t *table) Tinyint(name string) {
+	// TODO remove these not nulls
 	t.MakeColumn(name, "TINYINT", M_NOT_NULL)
 }
 
@@ -122,7 +129,7 @@ func (t *table) Mediumint(name string) {
 }
 
 func (t *table) Integer(name string) {
-	t.MakeColumn(name, "INTEGER", M_NOT_NULL)
+	t.MakeColumn(name, "INTEGER", M_NONE)
 }
 
 func (t *table) Bigint(name string) {
@@ -184,7 +191,7 @@ func (t *table) Char(name string, length int) {
 }
 
 func (t *table) Varchar(name string, length int) {
-	t.MakeColumn(name, fmt.Sprintf("VARCHAR(%d)", length), M_NOT_NULL)
+	t.MakeColumn(name, fmt.Sprintf("VARCHAR(%d)", length), M_NONE)
 }
 
 func (t *table) Binary(name string, length int) {
@@ -261,6 +268,50 @@ func (t *table) Set(name string, values ...string) {
 	t.MakeColumn(name, sbType.String(), M_NONE)
 }
 
+func (t *table) NotNull(name string) {
+	for _, column := range t.columns {
+		if column.name == name {
+			column.notNull = true
+			return
+		}
+	}
+
+	log.Printf("column %s not found", name)
+}
+
+func (t *table) AutoIncrement(name string) {
+	for _, column := range t.columns {
+		if column.name == name {
+			column.autoIncrement = true
+			return
+		}
+	}
+
+	log.Printf("column %s not found", name)
+}
+
+func (t *table) Unique(name string) {
+	for _, column := range t.columns {
+		if column.name == name {
+			column.unique = true
+			return
+		}
+	}
+
+	log.Printf("column %s not found", name)
+}
+
+func (t *table) Unsigned(name string) {
+	for _, column := range t.columns {
+		if column.name == name {
+			column.unsigned = true
+			return
+		}
+	}
+
+	log.Printf("column %s not found", name)
+}
+
 func (t *table) Timestamps() {
 	t.MakeColumn("CreatedAt", "DATETIME", M_NOT_NULL)
 	t.MakeColumn("UpdatedAt", "DATETIME", M_NOT_NULL)
@@ -299,6 +350,11 @@ func (t *table) toSQL() string {
 		var null string = ""
 		var autoIncrement string = ""
 		var keys string = ""
+		var unsigned string = ""
+
+		if col.unsigned {
+			unsigned = "UNSIGNED "
+		}
 
 		if col.notNull {
 			null = "NOT NULL "
@@ -323,7 +379,7 @@ func (t *table) toSQL() string {
 			keys = fmt.Sprintf("%s%sKEY", primary, unique)
 		}
 
-		definition := fmt.Sprintf("%s %s %s%s%s,", col.name, col.dataType, null, autoIncrement, keys)
+		definition := fmt.Sprintf("%s %s%s %s%s%s,", col.name, unsigned, col.dataType, null, autoIncrement, keys)
 		fmt.Fprint(&colBuilder, definition)
 	}
 

@@ -106,7 +106,7 @@ func TestBuildTable_OnlyAddsOmittedGORMColumnsAfterBuilderFunctionRuns(t *testin
 	}
 
 	assertStringContains(t, sql, "ID CHAR(40) NOT NULL PRIMARY UNIQUE KEY")
-	assertStringContains(t, sql, "CreatedAt INTEGER NOT NULL") // Test that we keep the INTEGER type column created at the start
+	assertStringContains(t, sql, "CreatedAt INTEGER") // Test that we keep the INTEGER type column created at the start
 	assertStringContains(t, sql, "UpdatedAt DATETIME NOT NULL")
 	assertStringContains(t, sql, "DeletedAt DATETIME")
 }
@@ -665,4 +665,57 @@ func TestBuildTable_DataType_Set(t *testing.T) {
 	assertStringContains(t, sql, "col1 SET('type1', 'type2', 'type3', 'type4')")
 }
 
-// TODO flags
+func TestBuildTable_Flags_NotNull(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("test")
+		tb.NotNull("test")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test INTEGER NOT NULL")
+}
+
+func TestBuildTable_Flags_AutoIncrement(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("test")
+		tb.AutoIncrement("test")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test INTEGER AUTO_INCREMENT")
+}
+
+func TestBuildTable_Flags_Unique(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Varchar("test", 40)
+		tb.Unique("test")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test VARCHAR(40) UNIQUE KEY")
+}
+
+func TestBuildTable_Flags_Unsigned(t *testing.T) {
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("test")
+		tb.Unsigned("test")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test UNSIGNED INTEGER")
+}
+
+// TODO indexes - when needed
+// TODO foreign keys - when needed
