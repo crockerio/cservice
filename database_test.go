@@ -678,6 +678,28 @@ func TestBuildTable_Flags_NotNull(t *testing.T) {
 	assertStringContains(t, sql, "test INTEGER NOT NULL")
 }
 
+func TestBuildTable_Flags_NotNull_LogsIfColumnNotFound(t *testing.T) {
+	// Capture Logger output.
+	var logOutput bytes.Buffer
+	log.SetOutput(&logOutput)
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+
+	// Test Below
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("test")
+		tb.NotNull("test2")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test INTEGER")
+	assertStringContains(t, logOutput.String(), "column test2 not found")
+}
+
 func TestBuildTable_Flags_AutoIncrement(t *testing.T) {
 	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
 		tb.Integer("test")
@@ -689,6 +711,28 @@ func TestBuildTable_Flags_AutoIncrement(t *testing.T) {
 	}
 
 	assertStringContains(t, sql, "test INTEGER AUTO_INCREMENT")
+}
+
+func TestBuildTable_Flags_AutoIncrement_LogsIfColumnNotFound(t *testing.T) {
+	// Capture Logger output.
+	var logOutput bytes.Buffer
+	log.SetOutput(&logOutput)
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+
+	// Test Below
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("test")
+		tb.AutoIncrement("test2")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test INTEGER")
+	assertStringContains(t, logOutput.String(), "column test2 not found")
 }
 
 func TestBuildTable_Flags_Unique(t *testing.T) {
@@ -704,6 +748,28 @@ func TestBuildTable_Flags_Unique(t *testing.T) {
 	assertStringContains(t, sql, "test VARCHAR(40) UNIQUE KEY")
 }
 
+func TestBuildTable_Flags_Unique_LogsIfColumnNotFound(t *testing.T) {
+	// Capture Logger output.
+	var logOutput bytes.Buffer
+	log.SetOutput(&logOutput)
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+
+	// Test Below
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Varchar("test", 40)
+		tb.Unique("test2")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test VARCHAR(40)")
+	assertStringContains(t, logOutput.String(), "column test2 not found")
+}
+
 func TestBuildTable_Flags_Unsigned(t *testing.T) {
 	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
 		tb.Integer("test")
@@ -715,6 +781,28 @@ func TestBuildTable_Flags_Unsigned(t *testing.T) {
 	}
 
 	assertStringContains(t, sql, "test UNSIGNED INTEGER")
+}
+
+func TestBuildTable_Flags_Unsigned_LogsIfColumnNotFound(t *testing.T) {
+	// Capture Logger output.
+	var logOutput bytes.Buffer
+	log.SetOutput(&logOutput)
+	t.Cleanup(func() {
+		log.SetOutput(os.Stderr)
+	})
+
+	// Test Below
+	sql, err := cservice.BuildTable("test", func(tb cservice.TableBuilder) {
+		tb.Integer("test")
+		tb.Unsigned("test2")
+	})
+
+	if err != nil {
+		t.Errorf("Error thrown: %s", err)
+	}
+
+	assertStringContains(t, sql, "test INTEGER")
+	assertStringContains(t, logOutput.String(), "column test2 not found")
 }
 
 // TODO indexes - when needed
