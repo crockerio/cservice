@@ -8,18 +8,34 @@ import (
 	"strings"
 )
 
+// columnModifier is a bitmask which reprents the modifiers which should be
+// applied to a given column.
 type columnModifier uint8
 
 const (
-	M_NOT_NULL = 1 << iota
+	// M_NOT_NULL flags a column as not allowed to be null.
+	M_NOT_NULL columnModifier = 1 << iota
+
+	// M_AUTO_INCREMENT flags that a column should automatically increment its
+	// value.
 	M_AUTO_INCREMENT
+
+	// M_UNIQUE flags that a column should be a unique key.
 	M_UNIQUE
+
+	// M_PRIMARY flags that a column should be a primary key.
 	M_PRIMARY
+
+	// M_UNSIGNED flags that a column should represent some form of unsigned
+	// number.
 	M_UNSIGNED
 
+	// M_NONE indicates that no column modifiers should be applied to the given
+	// column.
 	M_NONE = 0
 )
 
+// column reprents the configuration for a column within a table.
 type column struct {
 	name          string
 	dataType      string
@@ -30,84 +46,154 @@ type column struct {
 	unsigned      bool
 }
 
+// table represents a database table.
 type table struct {
 	name    string
 	columns []*column
 }
 
+// TableBuilder provides the primary interface for the Database Definition
+// Framework.
+//
+// It specifies all the factory methods which can be used to create and modify
+// columns within a table.
 type TableBuilder interface {
+	// ID adds the special ID column to the table.
 	ID()
 
-	// Integer Types
+	// Tinyint adds a TINYINT column to the table.
 	Tinyint(name string)
+
+	// Smallint adds a SMALLINT column to the table.
 	Smallint(name string)
+
+	// Mediumint adds a MEDIUMINT column to the table.
 	Mediumint(name string)
+
+	// Integer adds an INTEGER column to the table.
 	Integer(name string)
+
+	// Bigint adds a BIGINT column to the table.
 	Bigint(name string)
 
-	// TODO
+	// Decimal adds a DECIMAL(p, s) column to the table.
 	//
 	// From the MySQL documentation:
 	// The precision represents the number of significant digits that are stored
-	// for values, and the scale represents the number of digits that can be stored
-	// following the decimal point. Standard SQL requires that DECIMAL(5,2) be able
-	// to store any value with five digits and two decimals, so values that can be
-	// stored in the salary column range from -999.99 to 999.99.
+	// for values, and the scale represents the number of digits that can be
+	// stored following the decimal point. Standard SQL requires that
+	// DECIMAL(5,2) be able to store any value with five digits and two
+	// decimals, so values that can be stored in the salary column range from
+	// -999.99 to 999.99.
 	Decimal(name string, precision, scale int)
 
-	// TODO
+	// Numeric adds a NUMERIC(p, s) column to the table.
 	//
 	// From the MySQL documentation:
 	// The precision represents the number of significant digits that are stored
-	// for values, and the scale represents the number of digits that can be stored
-	// following the decimal point. Standard SQL requires that DECIMAL(5,2) be able
-	// to store any value with five digits and two decimals, so values that can be
-	// stored in the salary column range from -999.99 to 999.99.
+	// for values, and the scale represents the number of digits that can be
+	// stored following the decimal point. Standard SQL requires that
+	// DECIMAL(5,2) be able to store any value with five digits and two
+	// decimals, so values that can be stored in the salary column range from
+	// -999.99 to 999.99.
 	Numeric(name string, precision, scale int)
 
-	// Floating-point Types
+	// Float adds a FLOAT column to the table.
 	Float(name string)
+
+	// Double adds a DOUBLE column to the table.
 	Double(name string)
 
-	// TODO
+	// Bit adds a BIT column to the table.
 	//
 	// Length can range from 1 to 64 bits.
 	Bit(name string, length int)
 
+	// Date adds a DATE column to the table.
 	Date(name string)
+
+	// DateTime adds a DATETIME column to the table.
 	DateTime(name string)
+
+	// Timestamp adds a TIMESTAMP column to the table.
 	Timestamp(name string)
+
+	// Time adds a TIME column to the table.
 	Time(name string)
+
+	// Year adds a YEAR column to the table.
 	Year(name string)
 
+	// Char adds a CHAR column to the table.
 	Char(name string, length int)
+
+	// Varchar adds a VARCHAR column to the table.
 	Varchar(name string, length int)
+
+	// Binary adds a BINARY column to the table.
 	Binary(name string, length int)
+
+	// VARBINARY adds a VARBINARY column to the table.
 	Varbinary(name string, length int)
 
+	// Tinyblob adds a TINYBLOB column to the table.
 	Tinyblob(name string)
+
+	// Blob adds a BLOB column to the table.
 	Blob(name string)
+
+	// Mediumblob adds a MEDIUMBLOB column to the table.
 	Mediumblob(name string)
+
+	// Longblob adds a LONGBLOB column to the table.
 	Longblob(name string)
+
+	// Tinytext adds a TINYTEXT column to the table.
 	Tinytext(name string)
+
+	// Text adds a TEXT column to the table.
 	Text(name string)
+
+	// Mediumtext adds a MEDIUMTEXT column to the table.
 	Mediumtext(name string)
+
+	// Longtext adds a LONGTEXT column to the table.
 	Longtext(name string)
 
+	// Enum adds a ENUM column to the table.
 	Enum(name string, values ...string)
+
+	// Set adds a SET column to the table.
 	Set(name string, values ...string)
 
+	// NotNull indicates the named column should be flagged as NOT NULL.
 	NotNull(name string)
+
+	// Nullable indicates the named column should NOT be flagged as NOT NULL.
 	Nullable(name string)
+
+	// AutoIncrement indicates the named column should be flagged as
+	// AUTO_INCREMENT.
 	AutoIncrement(name string)
+
+	// Unique indicates the named column should be flagged as a UNIQUE KEY.
 	Unique(name string)
+
+	// Unsigned indicates the named column should be flagged as UNSIGNED.
 	Unsigned(name string)
 
+	// Timestamps creates the CreatedAt, UpdatedAt and DeletedAt columns as
+	// required by the GORM ORM.
 	Timestamps()
 
+	// MakeColumn creates a column.
 	MakeColumn(name string, dataType string, flags columnModifier)
 
+	// toSQL converts the table struct into SQL which can be executed to create
+	// the table.
 	toSQL() string
+
+	// hasColumn determines if the given column exists.
 	hasColumn(name string) bool
 }
 
@@ -406,6 +492,9 @@ func (t *table) hasColumn(name string) bool {
 	return false
 }
 
+// BuildTable provides the factory for definiing a table.
+//
+// The builder function should contain all column definitions.
 func BuildTable(tableName string, builder func(TableBuilder)) (string, error) {
 	validName, _ := regexp.Match("^[0-9,a-z,A-Z$_]+$", []byte(tableName))
 	if !validName {
