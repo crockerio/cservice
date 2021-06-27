@@ -2,12 +2,13 @@ package cservice_test
 
 import (
 	"bytes"
-	"crockerio/cservice"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"testing"
+	
+	"github.com/crockerio/cservice"
 )
 
 // assertHasError checks the expected error was thrown.
