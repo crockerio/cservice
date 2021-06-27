@@ -98,13 +98,13 @@ type TableBuilder interface {
 	Set(name string, values ...string)
 
 	NotNull(name string)
+	Nullable(name string)
 	AutoIncrement(name string)
 	Unique(name string)
 	Unsigned(name string)
 
 	Timestamps()
 
-	// TODO make dataType an enum?
 	MakeColumn(name string, dataType string, flags columnModifier)
 
 	toSQL() string
@@ -116,7 +116,6 @@ func (t *table) ID() {
 }
 
 func (t *table) Tinyint(name string) {
-	// TODO remove these not nulls
 	t.MakeColumn(name, "TINYINT", M_NOT_NULL)
 }
 
@@ -129,7 +128,7 @@ func (t *table) Mediumint(name string) {
 }
 
 func (t *table) Integer(name string) {
-	t.MakeColumn(name, "INTEGER", M_NONE)
+	t.MakeColumn(name, "INTEGER", M_NOT_NULL)
 }
 
 func (t *table) Bigint(name string) {
@@ -191,7 +190,7 @@ func (t *table) Char(name string, length int) {
 }
 
 func (t *table) Varchar(name string, length int) {
-	t.MakeColumn(name, fmt.Sprintf("VARCHAR(%d)", length), M_NONE)
+	t.MakeColumn(name, fmt.Sprintf("VARCHAR(%d)", length), M_NOT_NULL)
 }
 
 func (t *table) Binary(name string, length int) {
@@ -203,35 +202,35 @@ func (t *table) Varbinary(name string, length int) {
 }
 
 func (t *table) Tinyblob(name string) {
-	t.MakeColumn(name, "TINYBLOB", M_NONE)
+	t.MakeColumn(name, "TINYBLOB", M_NOT_NULL)
 }
 
 func (t *table) Blob(name string) {
-	t.MakeColumn(name, "BLOB", M_NONE)
+	t.MakeColumn(name, "BLOB", M_NOT_NULL)
 }
 
 func (t *table) Mediumblob(name string) {
-	t.MakeColumn(name, "MEDIUMBLOB", M_NONE)
+	t.MakeColumn(name, "MEDIUMBLOB", M_NOT_NULL)
 }
 
 func (t *table) Longblob(name string) {
-	t.MakeColumn(name, "LONGBLOB", M_NONE)
+	t.MakeColumn(name, "LONGBLOB", M_NOT_NULL)
 }
 
 func (t *table) Tinytext(name string) {
-	t.MakeColumn(name, "TINYTEXT", M_NONE)
+	t.MakeColumn(name, "TINYTEXT", M_NOT_NULL)
 }
 
 func (t *table) Text(name string) {
-	t.MakeColumn(name, "TEXT", M_NONE)
+	t.MakeColumn(name, "TEXT", M_NOT_NULL)
 }
 
 func (t *table) Mediumtext(name string) {
-	t.MakeColumn(name, "MEDIUMTEXT", M_NONE)
+	t.MakeColumn(name, "MEDIUMTEXT", M_NOT_NULL)
 }
 
 func (t *table) Longtext(name string) {
-	t.MakeColumn(name, "LONGTEXT", M_NONE)
+	t.MakeColumn(name, "LONGTEXT", M_NOT_NULL)
 }
 
 func (t *table) Enum(name string, values ...string) {
@@ -248,7 +247,7 @@ func (t *table) Enum(name string, values ...string) {
 	}
 	fmt.Fprint(&sbType, ")")
 
-	t.MakeColumn(name, sbType.String(), M_NONE)
+	t.MakeColumn(name, sbType.String(), M_NOT_NULL)
 }
 
 func (t *table) Set(name string, values ...string) {
@@ -265,13 +264,24 @@ func (t *table) Set(name string, values ...string) {
 	}
 	fmt.Fprint(&sbType, ")")
 
-	t.MakeColumn(name, sbType.String(), M_NONE)
+	t.MakeColumn(name, sbType.String(), M_NOT_NULL)
 }
 
 func (t *table) NotNull(name string) {
 	for _, column := range t.columns {
 		if column.name == name {
 			column.notNull = true
+			return
+		}
+	}
+
+	log.Printf("column %s not found", name)
+}
+
+func (t *table) Nullable(name string) {
+	for _, column := range t.columns {
+		if column.name == name {
+			column.notNull = false
 			return
 		}
 	}
