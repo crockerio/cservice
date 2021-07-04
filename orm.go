@@ -1,15 +1,20 @@
 package cservice
 
 import (
+	"errors"
 	"fmt"
 
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-// DatabaseConfig defines the settings required to initialise a MySQL database
-// connection.
+// DatabaseConfig defines the settings required to initialise a database
+// connection through the GORM ORM.
 type DatabaseConfig struct {
+	// Driver to use.
+	Driver string
+
 	// User to connect to the database as.
 	User string
 
@@ -28,26 +33,50 @@ type DatabaseConfig struct {
 	// Models to auto-migrate.
 	Models []interface{}
 
+	// File location to store the database (if we're using the SQLite driver)
+	//
+	// For a temporary, in-memory database, "file::memory:?cache=shared" can be
+	// used.
+	File string
+
 	// ExtraConfig defines the GORM configuration options.
 	ExtraConfig *gorm.Config
 }
 
 var db *gorm.DB
 
-func createDSN(config *DatabaseConfig) string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", config.User, config.Password, config.Host, config.Port, config.Database)
+func openMysqlConnection(config *DatabaseConfig) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", config.User, config.Password, config.Host, config.Port, config.Database)
+	return gorm.Open(mysql.Open(dsn), config.ExtraConfig)
 }
 
-// "root:root@tcp(localhost:3306)/user-service?charset=utf8&parseTime=True&loc=Local", &gorm.Config{}
-func InitDatabase(config *DatabaseConfig) error {
+func openSqliteConnection(config *DatabaseConfig) (*gorm.DB, error) {
+	return gorm.Open(sqlite.Open(config.File), config.ExtraConfig)
+}
+
+func openConnection(config *DatabaseConfig) (*gorm.DB, error) {
 	if config.ExtraConfig == nil {
 		config.ExtraConfig = &gorm.Config{}
 	}
 
-	dsn := createDSN(config)
+	switch config.Driver {
+	case "mysql":
+		return openMysqlConnection(config)
+	case "sqlite":
+		return openSqliteConnection(config)
+	default:
+		return nil, errors.New(fmt.Sprintf("unsupported database driver %s", config.Driver))
+	}
+}
 
+// InitDatabase connection with the given DatabaseConfig
+//
+// Current supported drivers:
+// - MySQL
+// - SQLite
+func InitDatabase(config *DatabaseConfig) error {
 	var err error
-	db, err = gorm.Open(mysql.Open(dsn), config.ExtraConfig)
+	db, err = openConnection(config)
 
 	if err == nil {
 		for _, model := range config.Models {
@@ -59,4 +88,12 @@ func InitDatabase(config *DatabaseConfig) error {
 	}
 
 	return err
+}
+
+func GetDB() *gorm.DB {
+	if db == nil {
+		panic("DB not initialised")
+	}
+
+	return db
 }
