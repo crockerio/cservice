@@ -1,14 +1,39 @@
 package cservice
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"gorm.io/gorm"
 )
 
 type RouteHandler httprouter.Handle
+
+type link struct {
+	Ref string `json:"ref"`
+	Url string `json:"url"`
+}
+
+type response struct {
+	Status bool        `json:"status"`
+	Data   interface{} `json:"data"`
+	Error  string      `json:"error"`
+	Links  []link      `json:"_links"`
+}
+
+type Controller interface {
+	Index(r *http.Request) (interface{}, error)
+	Create(r *http.Request) (interface{}, error)
+	Read(r *http.Request) (interface{}, error)
+	Update(r *http.Request) (interface{}, error)
+	Delete(r *http.Request) (interface{}, error)
+
+	SetDB(db *gorm.DB)
+}
 
 type route struct {
 	method  string
@@ -17,6 +42,7 @@ type route struct {
 }
 
 type server struct {
+	server *http.Server
 	routes []*route
 }
 
@@ -27,13 +53,69 @@ type iserver interface {
 	Patch(string, RouteHandler)
 	Delete(string, RouteHandler)
 
-	Resource(string, interface{})
+	Resource(string, Controller)
 
-	Start(port int)
+	// Start the server.
+	Start()
+
+	// Stop the server gracefully.
+	Stop()
 }
 
-func (s *server) Resource(path string, model interface{}) {
-	log.Fatal("Not Yet Implemented")
+func sendResponse(rw http.ResponseWriter, response interface{}) {
+	rw.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(rw).Encode(response); err != nil {
+		panic(err)
+	}
+}
+
+// TODO can we make these handlers
+func (s *server) Resource(path string, controller Controller) {
+	controller.SetDB(db)
+
+	// GET path
+	s.Get(path, func(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		res, err := controller.Index(r)
+
+		if err != nil {
+			sendResponse(rw, response{
+				Error:  err.Error(),
+				Status: false,
+			})
+			return
+		}
+
+		sendResponse(rw, response{
+			Data:   res,
+			Status: true,
+		})
+	})
+
+	// POST path
+	s.Post(path, func(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		res, err := controller.Create(r)
+
+		if err != nil {
+			sendResponse(rw, response{
+				Error:  err.Error(),
+				Status: false,
+			})
+			return
+		}
+
+		sendResponse(rw, response{
+			Data:   res,
+			Status: true,
+		})
+	})
+
+	// GET path/:id
+
+	// PUT path/:id
+	// PATCH path/:id
+
+	// DELETE path/:id
 }
 
 func (s *server) Get(path string, handler RouteHandler) {
@@ -76,19 +158,39 @@ func (s *server) Delete(path string, handler RouteHandler) {
 	})
 }
 
-func (s *server) Start(port int) {
+func (s *server) Start() {
 	router := httprouter.New()
 
 	for _, route := range s.routes {
 		router.Handle(route.method, route.path, httprouter.Handle(route.handler))
 	}
 
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), router)
+	s.server.Handler = router
+
+	err := s.server.ListenAndServe()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func NewServer() iserver {
-	return &server{}
+func (s *server) Stop() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	err := s.server.Shutdown(ctx)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func NewServer(port int) iserver {
+	srv := &http.Server{
+		Addr:         fmt.Sprintf("localhost:%d", port), // TODO configure host
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	return &server{
+		server: srv,
+	}
 }
