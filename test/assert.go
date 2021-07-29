@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+//TODO use an actual assertion library
+
 func AssertEquals(t *testing.T, expected, recieved interface{}) {
 	if expected != recieved {
 		t.Errorf("expected %v, got %v", expected, recieved)
